@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Participant, RemoteTrackPublication } from 'livekit-client';
-import { VideoRenderer } from '@livekit/components-react';
+import { VideoTrack } from '@livekit/components-react';
 
 interface VideoTileProps {
   participant: Participant;
@@ -14,9 +14,13 @@ export default function VideoTile({ participant, track }: VideoTileProps) {
     <div className="relative aspect-[9/16] rounded-xl overflow-hidden glass-pane border border-white/5 hover:border-fanx-secondary/50 transition-all group">
       {/* Video Stream */}
       <div className="w-full h-full bg-gray-900">
-        {track.isSubscribed && (
-          <VideoRenderer 
-            trackRef={{ participant, publication: track, source: track.source }}
+        {track.kind === 'video' && track.isSubscribed && (
+          <VideoTrack
+            trackRef={{ 
+              participant, 
+              publication: track, 
+              source: track.source 
+            }}
             className="w-full h-full object-cover"
           />
         )}
@@ -43,7 +47,7 @@ export default function VideoTile({ participant, track }: VideoTileProps) {
       {/* Activity Status */}
       <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
         <div className="text-[9px] text-gray-400">
-           SFU: 1080p
+           SFU: {track.dimensions?.width}x{track.dimensions?.height}
         </div>
         <button className="text-[10px] bg-fanx-secondary text-black px-3 py-1 rounded-full font-bold">
           ZOOM IN
