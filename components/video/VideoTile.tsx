@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Participant, RemoteTrackPublication } from 'livekit-client';
+import { Participant, TrackPublication } from 'livekit-client';
 import { VideoTrack } from '@livekit/components-react';
 
 interface VideoTileProps {
   participant: Participant;
-  track: RemoteTrackPublication;
+  track: TrackPublication;
 }
 
 export default function VideoTile({ participant, track }: VideoTileProps) {
