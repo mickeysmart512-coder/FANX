@@ -36,12 +36,16 @@ export default function Home() {
         </div>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <button className="px-10 py-4 bg-white text-black text-xl font-black rounded-full hover:scale-105 transition-all">
-            EXPLORE SESSIONS
-          </button>
-          <button className="px-10 py-4 glass-pane text-xl font-black rounded-full hover:bg-white/10 transition-all">
-            BECOME A HOST
-          </button>
+          <Link href="/explore">
+            <button className="px-10 py-4 bg-white text-black text-xl font-black rounded-full hover:scale-105 transition-all">
+              EXPLORE SESSIONS
+            </button>
+          </Link>
+          <Link href="/become-host">
+            <button className="px-10 py-4 glass-pane text-xl font-black rounded-full hover:bg-white/10 transition-all">
+              BECOME A HOST
+            </button>
+          </Link>
         </div>
 
         {/* Feature Grid Mockup */}
