@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -26,22 +27,40 @@ export default function SignupPage() {
 
     const checkUsername = async () => {
       setUsernameStatus('checking');
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username.toLowerCase())
-        .maybeSingle();
+      
+      try {
+        if (!supabase) {
+          console.warn('Supabase not initialized. Skipping username check.');
+          setUsernameStatus('available');
+          return;
+        }
 
-      if (error) {
-        console.error('Error checking username:', error);
-        setUsernameStatus('idle');
-        return;
-      }
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', username.toLowerCase())
+          .maybeSingle();
 
-      if (data) {
-        setUsernameStatus('taken');
-      } else {
-        setUsernameStatus('available');
+        if (error) {
+          // If the error is about the table not existing (42P01), we allow signup
+          if (error.code === '42P01') {
+            console.warn('Profiles table not found. Defaulting to available.');
+            setUsernameStatus('available');
+          } else {
+            console.error('Error checking username:', error);
+            setUsernameStatus('idle');
+          }
+          return;
+        }
+
+        if (data) {
+          setUsernameStatus('taken');
+        } else {
+          setUsernameStatus('available');
+        }
+      } catch (err) {
+        console.error('Unexpected error in username check:', err);
+        setUsernameStatus('available'); // Fallback to available to not block user
       }
     };
 
@@ -85,7 +104,11 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-black text-white relative overflow-hidden">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-background text-foreground relative overflow-hidden transition-colors duration-300">
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Background Glows */}
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fanx-primary/20 blur-[120px] rounded-full" />
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-fanx-secondary/20 blur-[120px] rounded-full" />

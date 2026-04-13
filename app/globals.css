@@ -34,6 +34,24 @@ body {
   border: 1px solid transparent;
   background: linear-gradient(var(--background), var(--background)) padding-box,
               linear-gradient(45deg, var(--fanx-primary), var(--fanx-secondary)) border-box;
+
+  .glass-pane {
+    @apply backdrop-blur-md bg-white/5 border border-white/10 dark:bg-black/5 dark:border-white/5 rounded-2xl;
+  }
+
+  .gradient-border {
+    border: 1px solid transparent;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(45deg, var(--fanx-primary), var(--fanx-secondary)) border-box;
+  }
+
+  .glow-primary {
+    @apply shadow-[0_0_20px_rgba(255,0,80,0.5)];
+  }
+
+  .glow-secondary {
+    @apply shadow-[0_0_20px_rgba(0,242,234,0.5)];
+  }
 }
 
 /* Custom Scrollbar for Grid */
@@ -49,13 +67,4 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
-}
-
-/* Glow Effects */
-.glow-primary {
-  box-shadow: 0 0 20px rgba(255, 0, 80, 0.3);
-}
-
-.glow-secondary {
-  box-shadow: 0 0 20px rgba(0, 242, 234, 0.3);
 }

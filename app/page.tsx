@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
   return (
@@ -11,7 +12,8 @@ export default function Home() {
         <h1 className="text-3xl font-black tracking-tighter italic">
           FAN<span className="text-fanx-primary underline decoration-fanx-secondary">X</span>
         </h1>
-        <div className="space-x-4">
+        <div className="flex items-center space-x-4">
+          <ThemeToggle />
           <Link href="/login" className="px-6 py-2 rounded-full glass-pane hover:bg-white/10 transition-all">
             Login
           </Link>

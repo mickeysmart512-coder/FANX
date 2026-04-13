@@ -9,32 +9,33 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "15.1.11",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "stripe": "latest",
-    "@supabase/supabase-js": "latest",
+    "@livekit/components-react": "latest",
+    "@lottiefiles/dotlottie-react": "latest",
     "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
+    "clsx": "latest",
+    "date-fns": "latest",
+    "flutterwave-react-v3": "latest",
+    "framer-motion": "latest",
     "livekit-client": "latest",
     "livekit-server-sdk": "latest",
-    "@livekit/components-react": "latest",
     "lucide-react": "latest",
-    "framer-motion": "latest",
-    "@lottiefiles/dotlottie-react": "latest",
-    "clsx": "latest",
-    "tailwind-merge": "latest",
+    "next": "15.1.11",
+    "next-themes": "^0.4.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-paystack": "latest",
-    "flutterwave-react-v3": "latest",
-    "date-fns": "latest"
+    "stripe": "latest",
+    "tailwind-merge": "latest"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "15.1.11",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "15.1.11"
+    "typescript": "^5"
   }
 }
