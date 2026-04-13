@@ -1,21 +1,62 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
+  // Username availability check with debounce
+  useEffect(() => {
+    if (username.length < 3) {
+      setUsernameStatus('idle');
+      return;
+    }
+
+    const checkUsername = async () => {
+      setUsernameStatus('checking');
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username.toLowerCase())
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking username:', error);
+        setUsernameStatus('idle');
+        return;
+      }
+
+      if (data) {
+        setUsernameStatus('taken');
+      } else {
+        setUsernameStatus('available');
+      }
+    };
+
+    const timeoutId = setTimeout(checkUsername, 500);
+    return () => clearTimeout(timeoutId);
+  }, [username]);
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (usernameStatus !== 'available') {
+      setError('Please choose an available username.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -25,6 +66,7 @@ export default function SignupPage() {
       options: {
         data: {
           full_name: fullName,
+          username: username.toLowerCase(),
           role: 'user', // Default role
         },
       },
@@ -57,7 +99,7 @@ export default function SignupPage() {
           <p className="text-gray-400">Create your account and start interacting.</p>
         </div>
 
-        <form onSubmit={handleSignup} className="space-y-6 glass-pane p-8 rounded-3xl border border-white/10">
+        <form onSubmit={handleSignup} className="space-y-5 glass-pane p-8 rounded-3xl border border-white/10">
           {error && (
             <div className="p-4 bg-red-500/10 border border-red-500/50 text-red-500 text-sm rounded-xl">
               {error}
@@ -77,9 +119,35 @@ export default function SignupPage() {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all"
+              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-600"
               placeholder="John Doe"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300 ml-1">Username</label>
+            <div className="relative">
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
+                className={`w-full px-5 py-4 bg-white/5 border rounded-2xl outline-none transition-all placeholder:text-gray-600 ${
+                  usernameStatus === 'available' ? 'border-green-500/50 focus:border-green-500' :
+                  usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500' :
+                  'border-white/10 focus:border-fanx-secondary'
+                }`}
+                placeholder="star_boy"
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                {usernameStatus === 'checking' && <Loader2 className="animate-spin text-gray-400" size={20} />}
+                {usernameStatus === 'available' && <CheckCircle2 className="text-green-500" size={20} />}
+                {usernameStatus === 'taken' && <XCircle className="text-red-500" size={20} />}
+              </div>
+            </div>
+            {usernameStatus === 'taken' && <p className="text-[10px] text-red-500 ml-1 font-bold italic">Username already taken!</p>}
+            {usernameStatus === 'available' && <p className="text-[10px] text-green-500 ml-1 font-bold italic">Username available!</p>}
+            <p className="text-[10px] text-gray-500 ml-1 font-medium italic">3+ characters, only letters, numbers, and underscores.</p>
           </div>
 
           <div className="space-y-2">
@@ -89,7 +157,7 @@ export default function SignupPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all"
+              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-600"
               placeholder="star@fanx.com"
             />
           </div>
@@ -101,15 +169,15 @@ export default function SignupPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all"
+              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-600"
               placeholder="••••••••"
             />
           </div>
 
           <button
             type="submit"
-            disabled={loading || success}
-            className="w-full py-4 bg-fanx-secondary hover:bg-fanx-secondary/90 text-black font-black rounded-2xl transition-all glow-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading || success || (username.length > 0 && usernameStatus !== 'available')}
+            className="w-full py-4 bg-fanx-secondary hover:bg-fanx-secondary/90 text-black font-black rounded-2xl transition-all glow-secondary disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest mt-4"
           >
             {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
           </button>
