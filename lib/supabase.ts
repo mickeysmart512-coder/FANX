@@ -1,7 +1,12 @@
 import { createBrowserClient } from '@supabase/ssr';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// Export a factory wrapper in case it's used inside client side lifecycle hooks
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
-// Only initialize if we have the credentials
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+// Fallback singleton
+export const supabase = createClient();
