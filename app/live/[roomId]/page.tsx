@@ -5,6 +5,7 @@ import LiveRoomContainer from '@/components/video/LiveRoomContainer';
 import GiftBar from '@/components/gifts/GiftBar';
 import GiftAnimationLayer from '@/components/gifts/GiftAnimationLayer';
 import ShareButton from '@/components/video/ShareButton';
+import HostControlBar from '@/components/video/HostControlBar';
 
 export default async function LiveRoom({ 
   params 
@@ -30,6 +31,15 @@ export default async function LiveRoom({
   const { data: { user } } = await supabase.auth.getUser();
   const identity = user?.user_metadata?.username || user?.email || 'guest-' + Math.floor(Math.random() * 100);
 
+  // Check if logged in user is the owner of this specific stream
+  const { data: session } = await supabase
+    .from('live_sessions')
+    .select('host_id')
+    .eq('id', roomId)
+    .single();
+
+  const isHost = user && session ? user.id === session.host_id : false;
+
   return (
     <div className="h-screen flex flex-col bg-black overflow-hidden relative">
       {/* Top Navigation */}
@@ -47,8 +57,14 @@ export default async function LiveRoom({
         </div>
         
         <div className="flex gap-2">
-          <ShareButton />
-          <a href="/host" className="px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-full">EXIT ROOM</a>
+          {isHost ? (
+            <button className="px-4 py-1.5 bg-fanx-primary text-white text-[10px] font-bold rounded-full">BATTLE / COLLAB</button>
+          ) : (
+            <ShareButton />
+          )}
+          <a href={isHost ? "/host" : "/explore"} className="px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-full">
+            {isHost ? "EXIT STUDIO" : "LEAVE ROOM"}
+          </a>
         </div>
       </header>
 
@@ -60,8 +76,12 @@ export default async function LiveRoom({
       {/* Global Real-time Layers */}
       <GiftAnimationLayer roomId={roomId} />
       
-      {/* Interaction Bar */}
-      <GiftBar roomId={roomId} />
+      {/* Interaction Bar (Host vs Fan) */}
+      {isHost ? (
+        <HostControlBar roomId={roomId} />
+      ) : (
+        <GiftBar roomId={roomId} />
+      )}
     </div>
   );
 }
