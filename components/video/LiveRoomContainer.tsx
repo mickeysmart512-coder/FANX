@@ -1,23 +1,32 @@
 'use client';
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LiveKitRoom, VideoConference } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { Loader2, AlertCircle } from 'lucide-react';
+import HostControlBar from './HostControlBar';
 
 interface LiveRoomContainerProps {
   roomId: string;
   identity: string;
+  canPublish?: boolean;
+  isHost?: boolean;
 }
 
-export default function LiveRoomContainer({ roomId, identity }: LiveRoomContainerProps) {
+export default function LiveRoomContainer({
+  roomId,
+  identity,
+  canPublish = true,
+  isHost = false,
+}: LiveRoomContainerProps) {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const resp = await fetch(`/api/live/token?roomId=${roomId}&identity=${identity}`);
+        const resp = await fetch(
+          `/api/live/token?roomId=${roomId}&identity=${encodeURIComponent(identity)}&canPublish=${canPublish}`
+        );
         const data = await resp.json();
         if (data.token) {
           setToken(data.token);
@@ -29,14 +38,14 @@ export default function LiveRoomContainer({ roomId, identity }: LiveRoomContaine
         setError('Connection error');
       }
     })();
-  }, [roomId, identity]);
+  }, [roomId, identity, canPublish]);
 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-red-500 gap-4">
         <AlertCircle size={48} />
         <p className="text-xl font-bold uppercase tracking-widest">{error}</p>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="px-6 py-2 bg-white text-black rounded-full font-black text-xs uppercase"
         >
@@ -49,7 +58,7 @@ export default function LiveRoomContainer({ roomId, identity }: LiveRoomContaine
   if (!token) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4">
-        <Loader2 className="animate-spin" size={48} />
+        <Loader2 size={48} />
         <p className="text-xl font-black italic tracking-tighter uppercase">Initializing Collision Room...</p>
       </div>
     );
@@ -57,14 +66,22 @@ export default function LiveRoomContainer({ roomId, identity }: LiveRoomContaine
 
   return (
     <LiveKitRoom
-      video={true}
-      audio={true}
+      video={canPublish}
+      audio={canPublish}
       token={token}
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://fanx-8ah57jg5.livekit.cloud'}
       data-lk-theme="default"
       className="h-full"
     >
+      {/* Video tiles for all participants */}
       <VideoConference />
+
+      {/*
+       * HostControlBar MUST render inside LiveKitRoom so that
+       * useLocalParticipant() has access to the room context.
+       * Only shown when isHost=true.
+       */}
+      {isHost && <HostControlBar roomId={roomId} />}
     </LiveKitRoom>
   );
 }

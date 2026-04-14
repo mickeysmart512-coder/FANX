@@ -4,17 +4,29 @@ import { cookies } from 'next/headers';
 import LiveRoomContainer from '@/components/video/LiveRoomContainer';
 import GiftBar from '@/components/gifts/GiftBar';
 import GiftAnimationLayer from '@/components/gifts/GiftAnimationLayer';
-import ShareButton from '@/components/video/ShareButton';
-import HostControlBar from '@/components/video/HostControlBar';
+// HostControlBar is rendered inside LiveRoomContainer (needs LiveKit context)
+// CollabModal is opened from within HostControlBar
 
-export default async function LiveRoom({ 
-  params 
-}: { 
-  params: Promise<{ roomId: string }> 
+/**
+ * Role logic:
+ *  - host     → the owner of this room. Gets HostControlBar (mic/cam controls, invite, end stream).
+ *  - cohost   → joined via co-host invite link. Gets mic+cam, but no end-stream button.
+ *  - fan      → joined via fan link (logged in). Gets GiftBar, no mic/cam.
+ *  - guest    → not logged in, or no role param. Sees stream + locked GiftBar (gate on interaction).
+ */
+
+type RoomRole = 'host' | 'cohost' | 'fan' | 'guest';
+
+export default async function LiveRoom({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ roomId: string }>;
+  searchParams: Promise<{ role?: string }>;
 }) {
   const { roomId } = await params;
-  
-  // Get user for identity
+  const { role: roleParam } = await searchParams;
+
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,16 +41,30 @@ export default async function LiveRoom({
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  const identity = user?.user_metadata?.username || user?.email || 'guest-' + Math.floor(Math.random() * 100);
 
-  // Check if logged in user is the owner of this specific stream
+  // Fetch session ownership
   const { data: session } = await supabase
     .from('live_sessions')
     .select('host_id')
     .eq('id', roomId)
     .single();
 
-  const isHost = user && session ? user.id === session.host_id : false;
+  // Determine role
+  let role: RoomRole = 'guest';
+  if (user && session && user.id === session.host_id) {
+    role = 'host';
+  } else if (roleParam === 'cohost' && user) {
+    role = 'cohost';
+  } else if (roleParam === 'fan' && user) {
+    role = 'fan';
+  } else if (!user || roleParam === 'fan') {
+    role = 'guest'; // not logged in → guest (can watch, can't interact)
+  }
+
+  const identity = user?.user_metadata?.username || user?.email || 'guest-' + Math.floor(Math.random() * 9999);
+  const canPublish = role === 'host' || role === 'cohost';
+  const isGuest = role === 'guest';
+  const isHost = role === 'host';
 
   return (
     <div className="h-screen flex flex-col bg-black overflow-hidden relative">
@@ -55,32 +81,42 @@ export default async function LiveRoom({
             </div>
           </div>
         </div>
-        
-        <div className="flex gap-2">
-          {isHost ? (
-            <button className="px-4 py-1.5 bg-fanx-primary text-white text-[10px] font-bold rounded-full">BATTLE / COLLAB</button>
-          ) : (
-            <ShareButton />
+
+        <div className="flex gap-2 items-center">
+          {/* Role badges */}
+          {role === 'cohost' && (
+            <span className="px-3 py-1 bg-fanx-primary/20 border border-fanx-primary/50 text-fanx-primary text-[9px] font-black rounded-full tracking-widest">CO-HOST</span>
           )}
-          <a href={isHost ? "/host" : "/explore"} className="px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-full">
-            {isHost ? "EXIT STUDIO" : "LEAVE ROOM"}
+          {isGuest && (
+            <span className="px-3 py-1 bg-white/10 text-gray-400 text-[9px] font-black rounded-full tracking-widest">GUEST VIEW</span>
+          )}
+
+          {/* Exit button */}
+          <a
+            href={isHost ? '/host' : '/explore'}
+            className="px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-full hover:scale-105 transition-all"
+          >
+            {isHost ? 'EXIT STUDIO' : 'LEAVE ROOM'}
           </a>
         </div>
       </header>
 
-      {/* Main Video View */}
-      <main className="flex-1">
-        <LiveRoomContainer roomId={roomId} identity={identity} />
+      {/* Main Video — everyone joins the room, publish rights differ */}
+      <main className="flex-1 pt-14">
+        <LiveRoomContainer
+          roomId={roomId}
+          identity={identity}
+          canPublish={canPublish}
+          isHost={isHost}
+        />
       </main>
 
-      {/* Global Real-time Layers */}
+      {/* Gift animations visible to everyone */}
       <GiftAnimationLayer roomId={roomId} />
-      
-      {/* Interaction Bar (Host vs Fan) */}
-      {isHost ? (
-        <HostControlBar roomId={roomId} />
-      ) : (
-        <GiftBar roomId={roomId} />
+
+      {/* Bottom Bar — fans and guests get GiftBar; host controls are inside LiveRoomContainer */}
+      {!isHost && (
+        <GiftBar roomId={roomId} isGuest={isGuest} />
       )}
     </div>
   );

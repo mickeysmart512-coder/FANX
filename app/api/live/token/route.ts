@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const roomId = searchParams.get('roomId');
-  const identity = searchParams.get('identity') || 'anonymous-' + Math.floor(Math.random() * 10000);
+  const identity = searchParams.get('identity') || 'guest-' + Math.floor(Math.random() * 10000);
+  const canPublish = searchParams.get('canPublish') !== 'false'; // default true, fans pass false
 
   if (!roomId) {
     return NextResponse.json({ error: 'Missing roomId' }, { status: 400 });
@@ -25,8 +26,8 @@ export async function GET(request: Request) {
   at.addGrant({ 
     roomJoin: true, 
     room: roomId,
-    canPublish: true,
-    canSubscribe: true 
+    canPublish: canPublish,   // hosts & cohosts publish; fans & guests subscribe only
+    canSubscribe: true        // everyone can watch 
   });
 
   return NextResponse.json({ 
