@@ -142,12 +142,11 @@ export default function CoHostNotification({ sessionId }: { sessionId: string })
 
   // Full sidebar panel
   return (
-    <div className="fixed right-0 top-0 h-full z-[160] flex items-stretch">
-      {/* Semi-transparent backdrop for the sidebar area */}
-      <div className="w-80 h-full flex flex-col" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
+    <div className="fixed right-4 top-24 z-[160]">
+      <div className="w-80 max-h-[70vh] flex flex-col rounded-2xl shadow-2xl shadow-black overflow-hidden border border-white/10" style={{ background: 'rgba(15,15,20,0.95)', backdropFilter: 'blur(20px)' }}>
         
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0 bg-white/5">
           <div>
             <h3 className="font-black text-sm text-white tracking-wide">CO-HOST REQUESTS</h3>
             <p className="text-[10px] text-gray-400">{requests.length} pending request{requests.length > 1 ? 's' : ''}</p>
@@ -161,12 +160,11 @@ export default function CoHostNotification({ sessionId }: { sessionId: string })
         </div>
 
         {/* Request list */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
           {requests.map(req => (
             <div
               key={req.id}
-              className="rounded-2xl p-4 space-y-3"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+              className="rounded-2xl p-4 space-y-3 bg-white/5 border border-white/5 hover:border-fanx-primary/40 transition-colors"
             >
               {/* Requester info */}
               <div className="flex items-center gap-3">
@@ -177,26 +175,25 @@ export default function CoHostNotification({ sessionId }: { sessionId: string })
                     <span className="font-black text-sm text-fanx-primary">{req.requester_name[0].toUpperCase()}</span>
                   )}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="font-black text-sm text-white truncate">{req.requester_name}</p>
                   <p className="text-[10px] text-gray-400 flex items-center gap-1">
-                    <UserPlus size={10} /> wants to co-host your stream
+                    <UserPlus size={10} /> wants to co-host
                   </p>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleAccept(req)}
-                  className="flex-1 py-2.5 bg-green-500 hover:bg-green-400 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all hover:scale-105"
+                  className="flex-1 py-2 bg-green-500 hover:bg-green-400 text-white font-black text-[11px] rounded-xl flex items-center justify-center gap-1 transition-all"
                 >
                   <Check size={14} /> ACCEPT
                 </button>
                 <button
                   onClick={() => handleReject(req)}
-                  className="flex-1 py-2.5 text-red-400 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all hover:scale-105"
-                  style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}
+                  className="flex-1 py-2 text-red-400 hover:bg-red-500/20 font-black text-[11px] rounded-xl flex items-center justify-center gap-1 transition-all bg-red-500/10 border border-red-500/30"
                 >
                   <X size={14} /> DECLINE
                 </button>
@@ -206,8 +203,8 @@ export default function CoHostNotification({ sessionId }: { sessionId: string })
         </div>
 
         {/* Footer hint */}
-        <div className="p-4 border-t border-white/5 flex-shrink-0">
-          <p className="text-[10px] text-gray-600 text-center">Panel auto-collapses after 2 minutes of inactivity</p>
+        <div className="p-3 bg-black/40 border-t border-white/5 flex-shrink-0">
+          <p className="text-[10px] text-gray-500 text-center font-medium">Panel auto-collapses in 2m</p>
         </div>
       </div>
     </div>

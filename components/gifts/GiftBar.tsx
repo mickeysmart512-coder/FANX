@@ -95,6 +95,8 @@ export default function GiftBar({ roomId, isGuest = false }: GiftBarProps) {
     return () => { supabase.removeChannel(channel); };
   }, [userId, roomId, cohostStatus, router]);
 
+  const [lastSentGift, setLastSentGift] = useState<string | null>(null);
+
   const requestCoHost = async () => {
     if (requireAuth('Sign in to request co-hosting this stream.')) return;
     if (!userId || !roomId) return;
@@ -143,6 +145,9 @@ export default function GiftBar({ roomId, isGuest = false }: GiftBarProps) {
         event: 'gift_sent',
         payload: { gift, senderName: 'A Fan' }
       });
+      
+      setLastSentGift(gift.id);
+      setTimeout(() => setLastSentGift(null), 500);
     }
   };
 
@@ -198,17 +203,29 @@ export default function GiftBar({ roomId, isGuest = false }: GiftBarProps) {
 
           {/* Gifts */}
           <div className="flex-1 flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-            {gifts.map(gift => (
-              <button key={gift.id} onClick={() => sendGift(gift)} title={`${gift.name} — ${gift.price} 🪙`} className="flex flex-col items-center gap-1 min-w-[56px] group">
-                <div
-                  className="w-11 h-11 rounded-xl glass-pane flex items-center justify-center text-xl group-hover:scale-110 transition-all"
-                  style={{ textShadow: `0 0 10px ${gift.color || '#fff'}` }}
+            {gifts.map(gift => {
+              const isSent = lastSentGift === gift.id;
+              return (
+                <button 
+                  key={gift.id} 
+                  onClick={() => sendGift(gift)} 
+                  title={`${gift.name} — ${gift.price} 🪙`} 
+                  className={`flex flex-col items-center gap-1 min-w-[56px] group transition-all duration-300 ${isSent ? 'scale-110 -translate-y-2' : ''}`}
                 >
-                  {gift.icon}
-                </div>
-                <span className="text-[9px] font-bold text-gray-300">{gift.price}</span>
-              </button>
-            ))}
+                  <div
+                    className={`w-11 h-11 rounded-xl glass-pane flex items-center justify-center text-xl group-hover:scale-110 transition-all ${isSent ? 'bg-white/20 ring-2' : ''}`}
+                    style={{ 
+                      textShadow: `0 0 10px ${gift.color || '#fff'}`,
+                      ringColor: isSent ? gift.color || '#fff' : 'transparent',
+                      boxShadow: isSent ? `0 0 20px ${gift.color || '#ffffff'}80` : 'none'
+                    }}
+                  >
+                    {gift.icon}
+                  </div>
+                  <span className={`text-[9px] font-bold ${isSent ? 'text-white' : 'text-gray-300'}`}>{gift.price}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Right side buttons */}
