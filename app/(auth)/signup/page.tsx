@@ -120,11 +120,29 @@ export default function SignupPage() {
       }
       setLoading(false);
     } else {
+      // Create profile record in public.profiles
+      if (data?.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            display_name: fullName,
+            username: username.toLowerCase(),
+            role: 'fan', // Default role
+          });
+        
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          // We don't block the user if profile creation fails, 
+          // but we log it. In a real app, a trigger is better.
+        }
+      }
+
       setSuccess(true);
       setLoading(false);
       setTimeout(() => {
         router.push('/login');
-      }, 3000);
+      }, 2000);
     }
   };
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   Video, 
   Users, 
@@ -19,16 +20,64 @@ import ThemeToggle from '@/components/ThemeToggle';
 
 export default function StarHub() {
   const [session, setSession] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [sessionTitle, setSessionTitle] = useState('');
+  const [category, setCategory] = useState('Music');
+  const [isPublic, setIsPublic] = useState(true);
+  const [isStarting, setIsStarting] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }: any) => {
-      setSession(data?.session || null);
-    });
+    async function loadData() {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+
+      if (session?.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        setProfile(profileData);
+      }
+      setLoading(false);
+    }
+
+    loadData();
   }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/';
+  };
+
+  const handleGoLive = async () => {
+    if (!session?.user) return;
+    setIsStarting(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('live_sessions')
+        .insert({
+          host_id: session.user.id,
+          title: sessionTitle || 'New Collision Session',
+          category: category,
+          is_public: isPublic,
+          status: 'live'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      router.push(`/live/${data.id}`);
+    } catch (error: any) {
+      alert('Error starting session: ' + error.message);
+    } finally {
+      setIsStarting(false);
+    }
   };
 
   return (
@@ -73,30 +122,33 @@ export default function StarHub() {
           </div>
           <div className="flex gap-4 items-center">
              <ThemeToggle />
-             <button className="px-10 py-5 bg-red-600 hover:bg-red-700 text-white rounded-3xl font-black text-xl flex items-center gap-3 hover:scale-105 transition-all shadow-[0_0_30px_rgba(220,38,38,0.3)] animate-pulse">
-                <Play size={24} fill="white" /> GO LIVE NOW
-             </button>
+             <button 
+              onClick={handleGoLive}
+              className="px-8 py-3 bg-fanx-primary hover:bg-fanx-primary/90 text-[10px] font-black uppercase rounded-full glow-primary transition-all flex items-center gap-2"
+            >
+              <Play size={16} fill="white" /> GO LIVE NOW
+            </button>
           </div>
         </header>
 
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           <HostStatCard 
-            label="Total Earnings" 
-            value="₦184,500" 
+            label="TOTAL EARNINGS" 
+            value={`₦${profile?.earnings?.toLocaleString() || '0'}`}
             sub="Last 30 days"
             icon={<DollarSign className="text-green-500" />}
           />
           <HostStatCard 
-            label="New Stars" 
-            value="12.4k" 
+            label="NEW STARS" 
+            value={profile?.follower_count?.toLocaleString() || '0'}
             sub="+15% growth"
             icon={<Users className="text-fanx-secondary" />}
           />
           <HostStatCard 
-            label="Total Gifts" 
-            value="8,241" 
-            sub="Top contributor: @king_fan"
+            label="TOTAL GIFTS" 
+            value="0"
+            sub="Top contributor: @none"
             icon={<Sparkles className="text-fanx-primary" />}
           />
         </div>
@@ -110,22 +162,38 @@ export default function StarHub() {
             <div className="space-y-4">
               <div className="space-y-2">
                  <label className="text-xs font-black uppercase tracking-widest text-gray-500">Session Name</label>
-                 <input type="text" placeholder="e.g. Acoustic Jam Session..." className="w-full bg-foreground/5 border border-foreground/10 px-6 py-4 rounded-3xl outline-none focus:border-fanx-primary transition-all" />
+                 <input 
+                  type="text" 
+                  value={sessionTitle}
+                  onChange={(e) => setSessionTitle(e.target.value)}
+                  className="w-full px-5 py-6 bg-white/5 border border-white/10 rounded-3xl outline-none focus:border-fanx-primary transition-all font-bold text-lg"
+                  placeholder="e.g. Late Night Vibes"
+                />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                   <label className="text-xs font-black uppercase tracking-widest text-gray-500">Category</label>
-                   <select className="w-full bg-foreground/5 border border-foreground/10 px-6 py-4 rounded-3xl outline-none appearance-none">
-                     <option>Music</option>
-                     <option>Comedy</option>
-                   </select>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">CATEGORY</label>
+                  <select 
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full px-5 py-5 bg-white/5 border border-white/10 rounded-3xl outline-none focus:border-fanx-primary transition-all font-bold"
+                  >
+                    <option value="Music">Music</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Gaming">Gaming</option>
+                    <option value="Lifestyle">Lifestyle</option>
+                  </select>
                 </div>
-                <div className="space-y-2">
-                   <label className="text-xs font-black uppercase tracking-widest text-gray-500">Access</label>
-                   <select className="w-full bg-foreground/5 border border-foreground/10 px-6 py-4 rounded-3xl outline-none appearance-none">
-                     <option>Public</option>
-                     <option>Private (Invite)</option>
-                   </select>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">ACCESS</label>
+                  <select 
+                    value={isPublic ? 'Public' : 'Private'}
+                    onChange={(e) => setIsPublic(e.target.value === 'Public')}
+                    className="w-full px-5 py-5 bg-white/5 border border-white/10 rounded-3xl outline-none focus:border-fanx-primary transition-all font-bold"
+                  >
+                    <option value="Public">Public</option>
+                    <option value="Private">Private</option>
+                  </select>
                 </div>
               </div>
             </div>

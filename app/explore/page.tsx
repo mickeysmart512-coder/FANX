@@ -1,10 +1,32 @@
 'use client';
 
-import React from 'react';
+import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Filter, Play } from 'lucide-react';
 
 export default function ExplorePage() {
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSessions() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('live_sessions')
+        .select('*, profiles(username, display_name, avatar_url, role)')
+        .eq('status', 'live');
+      
+      if (error) {
+        console.error('Error fetching sessions:', error);
+      } else {
+        setSessions(data || []);
+      }
+      setLoading(false);
+    }
+    fetchSessions();
+  }, []);
+
   return (
     <main className="min-h-screen bg-black text-white p-6 md:p-12 relative overflow-hidden">
       {/* Background Glows */}
@@ -46,41 +68,55 @@ export default function ExplorePage() {
         ))}
       </div>
 
-      {/* Session Grid Mockup */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 z-10 relative">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="group cursor-pointer">
-            <div className="aspect-[3/4] rounded-3xl overflow-hidden relative mb-4 border border-white/10 group-hover:border-fanx-primary/50 transition-all">
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10" />
-              <img 
-                src={`https://images.unsplash.com/photo-${1500000000000 + i}?auto=format&fit=crop&q=80&w=400`} 
-                alt="Star" 
-                className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
-              />
-              
-              <div className="absolute top-4 left-4 z-20 flex gap-2">
-                <span className="px-3 py-1 bg-red-600 text-[10px] font-black uppercase rounded-full flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> LIVE
-                </span>
-                <span className="px-3 py-1 bg-black/50 backdrop-blur-md text-[10px] font-black uppercase rounded-full">
-                  1.{i}k Watching
-                </span>
-              </div>
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="aspect-[3/4] rounded-3xl bg-white/5 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 z-10 relative">
+          {sessions.length === 0 ? (
+            <div className="col-span-full py-20 text-center">
+              <h2 className="text-2xl font-black text-gray-500 uppercase italic">No live sessions at the moment</h2>
+              <p className="text-gray-600">Be the first to start a collision!</p>
+            </div>
+          ) : (
+            sessions.map((session) => (
+              <div key={session.id} className="group cursor-pointer">
+                <div className="aspect-[3/4] rounded-3xl overflow-hidden relative mb-4 border border-white/10 group-hover:border-fanx-primary/50 transition-all">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10" />
+                  <img 
+                    src={session.profiles?.avatar_url || `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000)}?auto=format&fit=crop&q=80&w=400`} 
+                    alt="Star" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
+                  />
+                  
+                  <div className="absolute top-4 left-4 z-20 flex gap-2">
+                    <span className="px-3 py-1 bg-red-600 text-[10px] font-black uppercase rounded-full flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> LIVE
+                    </span>
+                    <span className="px-3 py-1 bg-black/50 backdrop-blur-md text-[10px] font-black uppercase rounded-full">
+                      {session.viewer_count?.toLocaleString()} Watching
+                    </span>
+                  </div>
 
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20">
-                <div className="w-16 h-16 bg-fanx-primary rounded-full flex items-center justify-center text-white glow-primary">
-                  <Play size={24} fill="white" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20">
+                    <div className="w-16 h-16 bg-fanx-primary rounded-full flex items-center justify-center text-white glow-primary">
+                      <Play size={24} fill="white" />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold">{session.title}</h3>
+                  <p className="text-sm font-medium text-gray-400">@{session.profiles?.username || 'unknown'}</p>
                 </div>
               </div>
-            </div>
-            
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold">Session Name Goes Here</h3>
-              <p className="text-sm font-medium text-gray-400">@star_username_{i}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       <footer className="mt-20 text-center">
         <Link href="/" className="px-10 py-4 glass-pane text-xl font-black rounded-full hover:bg-white/10 transition-all inline-block">

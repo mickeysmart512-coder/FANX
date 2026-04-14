@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "@livekit/components-react": "latest",
+    "@livekit/components-styles": "^1.2.0",
     "@lottiefiles/dotlottie-react": "latest",
-    "@supabase/ssr": "latest",
+    "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "latest",
     "clsx": "latest",
     "date-fns": "latest",

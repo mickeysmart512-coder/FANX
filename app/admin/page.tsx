@@ -17,52 +17,8 @@ import ThemeToggle from '@/components/ThemeToggle';
 import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
-  };
-
   return (
-    <div className="min-h-screen bg-background text-foreground flex transition-colors duration-300">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-foreground/10 p-6 flex flex-col gap-8 hidden md:flex">
-        <div className="text-2xl font-black italic tracking-tighter">
-          FAN<span className="text-fanx-primary">X</span> ADMIN
-        </div>
-
-        <nav className="flex-1 space-y-2">
-          <Link href="/admin" className="flex items-center gap-3 px-4 py-3 bg-foreground/5 text-foreground rounded-xl font-medium transition-all">
-            <Activity size={20} /> Dashboard
-          </Link>
-          <Link href="/admin/users" className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-foreground/5 hover:text-foreground rounded-xl font-medium transition-all">
-            <Users size={20} /> Users
-          </Link>
-          <Link href="/admin/sessions" className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-foreground/5 hover:text-foreground rounded-xl font-medium transition-all">
-            <Video size={20} /> Live Sessions
-          </Link>
-          <Link href="/admin/revenue" className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-foreground/5 hover:text-foreground rounded-xl font-medium transition-all">
-            <DollarSign size={20} /> Revenue
-          </Link>
-          <Link href="/admin/security" className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-foreground/5 hover:text-foreground rounded-xl font-medium transition-all">
-            <ShieldAlert size={20} /> Security
-          </Link>
-        </nav>
-
-        <div className="pt-6 border-t border-foreground/10 space-y-2">
-          <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-foreground/5 hover:text-foreground rounded-xl font-medium transition-all">
-            <Settings size={20} /> Settings
-          </Link>
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl font-medium transition-all"
-          >
-            <LogOut size={20} /> Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto">
+    <main className="flex-1 p-8 overflow-y-auto">
         <header className="flex justify-between items-center mb-10">
           <div>
             <h1 className="text-4xl font-black tracking-tight">COMMAND CENTER</h1>
@@ -148,7 +104,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </main>
-    </div>
   );
 }
 
