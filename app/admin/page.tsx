@@ -14,9 +14,14 @@ import {
 } from 'lucide-react';
 import PayoutPanel from '@/components/admin/PayoutPanel';
 
-import ThemeToggle from '@/components/ThemeToggle';
+import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex transition-colors duration-300">
       {/* Sidebar */}
@@ -26,7 +31,7 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="flex-1 space-y-2">
-          <Link href="/admin/users" className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-foreground/5 hover:text-foreground rounded-xl font-medium transition-all">
+          <Link href="/admin" className="flex items-center gap-3 px-4 py-3 bg-foreground/5 text-foreground rounded-xl font-medium transition-all">
             <Activity size={20} /> Dashboard
           </Link>
           <Link href="/admin/users" className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-foreground/5 hover:text-foreground rounded-xl font-medium transition-all">
@@ -47,7 +52,10 @@ export default function AdminDashboard() {
           <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-foreground/5 hover:text-foreground rounded-xl font-medium transition-all">
             <Settings size={20} /> Settings
           </Link>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl font-medium transition-all">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl font-medium transition-all"
+          >
             <LogOut size={20} /> Logout
           </button>
         </div>

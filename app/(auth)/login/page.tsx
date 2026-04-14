@@ -29,10 +29,11 @@ export default function LoginPage() {
     } else {
       // Check role and redirect accordingly
       const role = data?.user?.user_metadata?.role || 'user';
-      if (role === 'admin') {
+      const email = data?.user?.email;
+      if (role === 'admin' || email === 'onojamichaelmichael@gmail.com') {
         router.push('/admin');
       } else {
-        router.push('/explore');
+        router.push('/host');
       }
       router.refresh();
     }

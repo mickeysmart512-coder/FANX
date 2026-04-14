@@ -22,7 +22,7 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const dashboardPath = (session?.user?.user_metadata?.role === 'admin' || session?.user?.email === 'onojamichaelmichael@gmail.com') ? '/admin' : '/explore';
+  const dashboardPath = (session?.user?.user_metadata?.role === 'admin' || session?.user?.email === 'onojamichaelmichael@gmail.com') ? '/admin' : '/host';
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
