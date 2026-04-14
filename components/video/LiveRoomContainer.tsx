@@ -25,7 +25,7 @@ interface LiveRoomContainerProps {
 // ---- Inner: Grid + Focus Layout ----
 function StreamGrid({ hostUserId, cohostUserIds }: { hostUserId?: string; cohostUserIds?: string[] }) {
   const participants = useParticipants();
-  const tracks = useTracks([{ source: Track.Source.Camera }]);
+  const tracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: false }]);
   const [focusedIdentity, setFocusedIdentity] = useState<string | null>(null);
 
   const getRoleBadge = (identity: string) => {
