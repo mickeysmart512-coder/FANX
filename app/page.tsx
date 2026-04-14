@@ -2,25 +2,48 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const [session, setSession] = useState<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }: any) => {
-      setSession(data?.session || null);
+      const currentSession = data?.session || null;
+      setSession(currentSession);
+      
+      // Auto-redirect if session exists
+      if (currentSession) {
+        const role = currentSession.user.user_metadata?.role;
+        const email = currentSession.user.email;
+        if (role === 'admin' || email === 'onojamichaelmichael@gmail.com') {
+          router.push('/admin');
+        } else {
+          router.push('/explore');
+        }
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setSession(session);
+      if (session) {
+        const role = session.user.user_metadata?.role;
+        const email = session.user.email;
+        if (role === 'admin' || email === 'onojamichaelmichael@gmail.com') {
+          router.push('/admin');
+        } else {
+          router.push('/explore');
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [router]);
 
-  const dashboardPath = session?.user?.user_metadata?.role === 'admin' ? '/admin' : '/explore';
+  const dashboardPath = (session?.user?.user_metadata?.role === 'admin' || session?.user?.email === 'onojamichaelmichael@gmail.com') ? '/admin' : '/explore';
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -38,6 +61,11 @@ export default function Home() {
           FAN<span className="text-fanx-primary underline decoration-fanx-secondary">X</span>
         </h1>
         <div className="flex items-center space-x-4">
+          {session && (
+            <span className="text-[10px] bg-foreground/5 px-2 py-1 rounded text-gray-500 font-mono">
+              DEBUG: {session.user.user_metadata?.role || 'no-role'}
+            </span>
+          )}
           <ThemeToggle />
           {!session ? (
             <>

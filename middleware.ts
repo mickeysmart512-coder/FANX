@@ -67,7 +67,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (user?.user_metadata?.role !== 'admin') {
+    const isAdmin = 
+      user?.email === 'onojamichaelmichael@gmail.com' || 
+      user?.user_metadata?.role === 'admin';
+
+    if (!isAdmin) {
       return NextResponse.redirect(new URL('/', request.url));
     }
   }
