@@ -13,7 +13,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import PayoutPanel from '@/components/admin/PayoutPanel';
-
+import ThemeToggle from '@/components/ThemeToggle';
 import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
