@@ -1,7 +1,27 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const dashboardPath = session?.user?.user_metadata?.role === 'admin' ? '/admin' : '/explore';
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-foreground relative overflow-hidden transition-colors duration-300">
       {/* Background Glows */}
@@ -14,12 +34,20 @@ export default function Home() {
         </h1>
         <div className="flex items-center space-x-4">
           <ThemeToggle />
-          <Link href="/login" className="px-6 py-2 rounded-full glass-pane hover:bg-foreground/10 transition-all">
-            Login
-          </Link>
-          <Link href="/signup" className="px-6 py-2 rounded-full bg-fanx-primary text-white font-bold hover:scale-105 transition-all glow-primary">
-            Join Now
-          </Link>
+          {!session ? (
+            <>
+              <Link href="/login" className="px-6 py-2 rounded-full glass-pane hover:bg-foreground/10 transition-all">
+                Login
+              </Link>
+              <Link href="/signup" className="px-6 py-2 rounded-full bg-fanx-primary text-white font-bold hover:scale-105 transition-all glow-primary">
+                Join Now
+              </Link>
+            </>
+          ) : (
+            <Link href={dashboardPath} className="px-6 py-2 rounded-full bg-foreground text-background font-bold hover:scale-105 transition-all">
+              Dashboard
+            </Link>
+          )}
         </div>
       </header>
 
@@ -38,16 +66,18 @@ export default function Home() {
         </div>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <Link href="/explore">
-            <button className="px-10 py-4 bg-foreground text-background text-xl font-black rounded-full hover:scale-105 transition-all">
-              EXPLORE SESSIONS
+          <Link href={session ? dashboardPath : "/explore"}>
+            <button className="px-10 py-4 bg-foreground text-background text-xl font-black rounded-full hover:scale-105 transition-all uppercase tracking-tight">
+              {session ? 'Explore Sessions' : 'Start Exploring'}
             </button>
           </Link>
-          <Link href="/become-host">
-            <button className="px-10 py-4 glass-pane text-xl font-black rounded-full hover:bg-foreground/10 transition-all">
-              BECOME A HOST
-            </button>
-          </Link>
+          {!session && (
+            <Link href="/become-host">
+              <button className="px-10 py-4 glass-pane text-xl font-black rounded-full hover:bg-foreground/10 transition-all uppercase tracking-tight">
+                Become a Host
+              </button>
+            </Link>
+          )}
         </div>
 
         {/* Feature Grid Mockup */}

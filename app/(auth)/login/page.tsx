@@ -18,7 +18,7 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -27,7 +27,13 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push('/');
+      // Check role and redirect accordingly
+      const role = data?.user?.user_metadata?.role || 'user';
+      if (role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/explore');
+      }
       router.refresh();
     }
   };
