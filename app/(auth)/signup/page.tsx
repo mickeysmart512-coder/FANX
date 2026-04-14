@@ -119,10 +119,10 @@ export default function SignupPage() {
             FAN<span className="text-fanx-primary underline decoration-fanx-secondary">X</span>
           </Link>
           <h2 className="text-2xl font-bold">Join the Collision</h2>
-          <p className="text-gray-400">Create your account and start interacting.</p>
+          <p className="text-gray-500 dark:text-gray-400">Create your account and start interacting.</p>
         </div>
 
-        <form onSubmit={handleSignup} className="space-y-5 glass-pane p-8 rounded-3xl border border-white/10">
+        <form onSubmit={handleSignup} className="space-y-5 glass-pane p-8 rounded-3xl border border-foreground/10">
           {error && (
             <div className="p-4 bg-red-500/10 border border-red-500/50 text-red-500 text-sm rounded-xl">
               {error}
@@ -136,29 +136,29 @@ export default function SignupPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300 ml-1">Full Name</label>
+            <label className="text-sm font-medium text-gray-500 dark:text-gray-400 ml-1">Full Name</label>
             <input
               type="text"
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-600"
+              className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-500"
               placeholder="John Doe"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300 ml-1">Username</label>
+            <label className="text-sm font-medium text-gray-500 dark:text-gray-400 ml-1">Username</label>
             <div className="relative">
               <input
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-                className={`w-full px-5 py-4 bg-white/5 border rounded-2xl outline-none transition-all placeholder:text-gray-600 ${
+                className={`w-full px-5 py-4 bg-foreground/5 border rounded-2xl outline-none transition-all placeholder:text-gray-500 ${
                   usernameStatus === 'available' ? 'border-green-500/50 focus:border-green-500' :
                   usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500' :
-                  'border-white/10 focus:border-fanx-secondary'
+                  'border-foreground/10 focus:border-fanx-secondary'
                 }`}
                 placeholder="star_boy"
               />
@@ -174,25 +174,25 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300 ml-1">Email Address</label>
+            <label className="text-sm font-medium text-gray-500 dark:text-gray-400 ml-1">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-600"
+              className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-500"
               placeholder="star@fanx.com"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300 ml-1">Password</label>
+            <label className="text-sm font-medium text-gray-500 dark:text-gray-400 ml-1">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-600"
+              className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-2xl focus:border-fanx-secondary focus:ring-1 focus:ring-fanx-secondary outline-none transition-all placeholder:text-gray-500"
               placeholder="••••••••"
             />
           </div>
@@ -205,7 +205,7 @@ export default function SignupPage() {
             {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
           </button>
 
-          <div className="text-center text-sm text-gray-400 mt-4">
+          <div className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
             Already have an account?{' '}
             <Link href="/login" className="text-fanx-primary font-bold hover:underline">
               Log In

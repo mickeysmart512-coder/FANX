@@ -3,7 +3,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-black text-white relative overflow-hidden">
+    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-foreground relative overflow-hidden transition-colors duration-300">
       {/* Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-fanx-primary/20 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fanx-secondary/20 blur-[120px] rounded-full" />
@@ -14,7 +14,7 @@ export default function Home() {
         </h1>
         <div className="flex items-center space-x-4">
           <ThemeToggle />
-          <Link href="/login" className="px-6 py-2 rounded-full glass-pane hover:bg-white/10 transition-all">
+          <Link href="/login" className="px-6 py-2 rounded-full glass-pane hover:bg-foreground/10 transition-all">
             Login
           </Link>
           <Link href="/signup" className="px-6 py-2 rounded-full bg-fanx-primary text-white font-bold hover:scale-105 transition-all glow-primary">
@@ -31,7 +31,7 @@ export default function Home() {
               STARS COLLIDE.
             </span>
           </h2>
-          <p className="text-xl text-gray-400 font-medium">
+          <p className="text-xl text-gray-500 dark:text-gray-400 font-medium">
             The ultimate hybrid of TikTok Live × Zoom. 50 Celebrities. Thousands of Fans. 
             Real-time money moves.
           </p>
@@ -39,12 +39,12 @@ export default function Home() {
 
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/explore">
-            <button className="px-10 py-4 bg-white text-black text-xl font-black rounded-full hover:scale-105 transition-all">
+            <button className="px-10 py-4 bg-foreground text-background text-xl font-black rounded-full hover:scale-105 transition-all">
               EXPLORE SESSIONS
             </button>
           </Link>
           <Link href="/become-host">
-            <button className="px-10 py-4 glass-pane text-xl font-black rounded-full hover:bg-white/10 transition-all">
+            <button className="px-10 py-4 glass-pane text-xl font-black rounded-full hover:bg-foreground/10 transition-all">
               BECOME A HOST
             </button>
           </Link>

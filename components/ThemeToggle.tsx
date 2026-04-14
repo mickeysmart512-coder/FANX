@@ -19,7 +19,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="p-3 glass-pane border border-white/10 dark:border-white/10 rounded-full hover:bg-white/10 transition-all z-[100] relative group flex items-center justify-center overflow-hidden"
+      className="p-3 glass-pane border border-foreground/10 rounded-full hover:bg-foreground/10 transition-all z-[100] relative group flex items-center justify-center overflow-hidden"
       aria-label="Toggle theme"
     >
       <div className="relative w-6 h-6">
@@ -51,7 +51,7 @@ export default function ThemeToggle() {
       </div>
       
       {/* Tooltip */}
-      <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10">
+      <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background text-foreground text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-foreground/10 shadow-lg">
         Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
       </span>
     </button>
