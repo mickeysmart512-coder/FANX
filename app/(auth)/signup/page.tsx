@@ -238,8 +238,6 @@ export default function SignupPage() {
             </Link>
           </div>
         </form>
-
-        </form>
       </div>
     </main>
   );
