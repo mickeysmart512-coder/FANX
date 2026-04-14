@@ -8,8 +8,9 @@ import GiftAnimationLayer from '@/components/gifts/GiftAnimationLayer';
 /**
  * Role Matrix:
  *  host    → creator of the session. HostControlBar + INVITE button.
- *  cohost  → approved co-host (?role=cohost). CoHostControlBar (mic/cam, NO end stream).
- *  fan     → logged in, joined fan link. GiftBar + Request Co-Host button.
+ *  cohost  → has ?role=cohost link (host gave it to them) OR got approved from request.
+ *            Gets mic/cam + CoHostControlBar. The invite link IS the authorization — no extra request.
+ *  fan     → logged in fan. GiftBar + can spontaneously REQUEST co-host from inside room.
  *  guest   → not logged in. GiftBar locked (GuestGate on interaction).
  */
 
@@ -56,12 +57,13 @@ export default async function LiveRoom({
   // Determine role
   let role: RoomRole = 'guest';
   if (user && session && user.id === session.host_id) {
+    // They own this session → host
     role = 'host';
-  } else if (roleParam === 'cohost' && user && cohostUserIds.includes(user.id)) {
-    role = 'cohost';
   } else if (roleParam === 'cohost' && user) {
-    // They have the cohost link but request not yet accepted — treat as fan for now
-    role = 'fan';
+    // They have the co-host invite link from the host → immediately co-host.
+    // The invite link IS the authorization — no additional request/approval needed.
+    // (Request flow is only for fans who spontaneously ask from inside the room.)
+    role = 'cohost';
   } else if (user) {
     role = 'fan';
   } else {
