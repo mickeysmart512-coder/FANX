@@ -5,6 +5,7 @@ import { useLocalParticipant } from '@livekit/components-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import CollabModal from './CollabModal';
+import CoHostNotification from './CoHostNotification';
 
 export default function HostControlBar({ roomId }: { roomId: string }) {
   const { localParticipant, isMicrophoneEnabled, isCameraEnabled } = useLocalParticipant();
@@ -27,16 +28,19 @@ export default function HostControlBar({ roomId }: { roomId: string }) {
 
   return (
     <>
+      {/* Co-host request notifications — shown only to the host */}
+      <CoHostNotification sessionId={roomId} />
+
       {showCollab && (
         <CollabModal roomId={roomId} onClose={() => setShowCollab(false)} />
       )}
 
       <div className="fixed bottom-0 left-0 w-full glass-pane border-t border-white/10 p-5 z-50">
         <div className="max-w-screen-xl mx-auto flex items-center justify-between">
-          {/* Left — stream info */}
+          {/* Left — live badge */}
           <div className="text-xs text-gray-500 font-mono hidden sm:block">
             <span className="text-green-400 font-black">● LIVE</span>
-            <span className="ml-2">ROOM {roomId.substring(0, 8).toUpperCase()}</span>
+            <span className="ml-2 text-gray-600">ROOM {roomId.substring(0, 8).toUpperCase()}</span>
           </div>
 
           {/* Center — main controls */}
@@ -45,9 +49,7 @@ export default function HostControlBar({ roomId }: { roomId: string }) {
               onClick={toggleMic}
               title={isMicrophoneEnabled ? 'Mute microphone' : 'Unmute microphone'}
               className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
-                isMicrophoneEnabled
-                  ? 'bg-white/10 hover:bg-white/20 text-white'
-                  : 'bg-red-500/20 text-red-400 border border-red-500/50'
+                isMicrophoneEnabled ? 'bg-white/10 hover:bg-white/20' : 'bg-red-500/20 text-red-400 border border-red-500/50'
               }`}
             >
               {isMicrophoneEnabled ? <Mic size={22} /> : <MicOff size={22} />}
@@ -64,16 +66,14 @@ export default function HostControlBar({ roomId }: { roomId: string }) {
               onClick={toggleCamera}
               title={isCameraEnabled ? 'Turn off camera' : 'Turn on camera'}
               className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
-                isCameraEnabled
-                  ? 'bg-white/10 hover:bg-white/20 text-white'
-                  : 'bg-red-500/20 text-red-400 border border-red-500/50'
+                isCameraEnabled ? 'bg-white/10 hover:bg-white/20' : 'bg-red-500/20 text-red-400 border border-red-500/50'
               }`}
             >
               {isCameraEnabled ? <Video size={22} /> : <VideoOff size={22} />}
             </button>
           </div>
 
-          {/* Right — share */}
+          {/* Right — invite */}
           <button
             onClick={() => setShowCollab(true)}
             className="px-5 py-2.5 bg-fanx-primary text-white font-black text-[10px] rounded-full tracking-widest hover:scale-105 transition-all hidden sm:flex items-center gap-2"
