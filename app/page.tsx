@@ -93,7 +93,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <Link href={session ? dashboardPath : "/explore"}>
+          <Link href="/explore">
             <button className="px-10 py-4 bg-foreground text-background text-xl font-black rounded-full hover:scale-105 transition-all uppercase tracking-tight">
               {session ? 'Explore Sessions' : 'Start Exploring'}
             </button>
