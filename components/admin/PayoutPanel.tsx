@@ -27,11 +27,11 @@ export default function PayoutPanel() {
   };
 
   return (
-    <div className="p-6 glass-pane border border-white/10 space-y-6">
+    <div className="p-6 glass-pane border border-foreground/10 space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-black italic">GLOBAL PAYOUTS</h2>
         <div className="flex gap-2 text-[10px] font-bold">
-          <span className="px-3 py-1 bg-white/10 rounded-full border border-white/20">
+          <span className="px-3 py-1 bg-foreground/5 dark:bg-white/10 rounded-full border border-foreground/10 dark:border-white/20 text-gray-500 dark:text-gray-300">
             AUTO-CONVERSION: 1,550 NGN/USD
           </span>
         </div>
@@ -39,7 +39,7 @@ export default function PayoutPanel() {
 
       <div className="overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="text-[10px] text-gray-500 uppercase font-black border-b border-white/10">
+          <thead className="text-[10px] text-gray-500 uppercase font-black border-b border-foreground/10">
             <tr>
               <th className="pb-4">Celebrity</th>
               <th className="pb-4">Coins Balance</th>
@@ -49,9 +49,9 @@ export default function PayoutPanel() {
               <th className="pb-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-foreground/5">
             {payouts.map((payout) => (
-              <tr key={payout.id} className="group hover:bg-white/5 transition-all">
+              <tr key={payout.id} className="group hover:bg-foreground/5 transition-all">
                 <td className="py-4 font-bold">{payout.celeb}</td>
                 <td className="py-4 font-mono text-fanx-secondary">{payout.coins.toLocaleString()} 🪙</td>
                 <td className="py-4 text-xs">{formatCurrency(coinsToUsd(payout.coins), 'USD')}</td>
@@ -65,7 +65,7 @@ export default function PayoutPanel() {
                     }`}>
                       {payout.status}
                     </span>
-                    <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase bg-white/10 ${
+                    <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase bg-foreground/10 ${
                       payout.risk === 'High' ? 'text-red-500' : 'text-green-500'
                     }`}>
                       {payout.risk} Risk
@@ -77,7 +77,7 @@ export default function PayoutPanel() {
                   <button 
                     disabled={payout.status === 'Processing'}
                     onClick={() => lockPayout(payout.id)}
-                    className="px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-full disabled:opacity-50"
+                    className="px-4 py-1.5 bg-foreground text-background text-[10px] font-bold rounded-full disabled:opacity-50"
                   >
                     {payout.status === 'Processing' ? 'LOCKED' : 'APPROVE'}
                   </button>
