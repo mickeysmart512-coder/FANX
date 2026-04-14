@@ -30,8 +30,8 @@ export default function SignupPage() {
       
       try {
         if (!supabase) {
-          console.warn('Supabase not initialized. Skipping username check.');
-          setUsernameStatus('available');
+          console.error('Supabase not initialized. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment variables.');
+          setUsernameStatus('idle'); // Don't show 'available' if we don't know
           return;
         }
 
@@ -93,7 +93,13 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
+    if (!supabase) {
+      setError('Supabase is not configured. Please add your SUPABASE_URL and ANON_KEY to your Vercel project settings.');
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -106,7 +112,12 @@ export default function SignupPage() {
     });
 
     if (error) {
-      setError(error.message);
+      console.error('Signup error details:', error);
+      if (error.message === 'Failed to fetch') {
+        setError('Network Error: Failed to reach Supabase. Please check your internet connection or ensure your Supabase project is not paused.');
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
       setSuccess(true);
@@ -127,7 +138,7 @@ export default function SignupPage() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fanx-primary/20 blur-[120px] rounded-full" />
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-fanx-secondary/20 blur-[120px] rounded-full" />
 
-      <div className="w-full max-w-md z-10">
+      <div className="w-full max-w-md z-10 py-10">
         <div className="text-center mb-10">
           <Link href="/" className="text-4xl font-black tracking-tighter italic inline-block mb-4">
             FAN<span className="text-fanx-primary underline decoration-fanx-secondary">X</span>
@@ -227,6 +238,50 @@ export default function SignupPage() {
             </Link>
           </div>
         </form>
+
+        {/* Diagnostic Panel */}
+        <div className="mt-8 p-6 glass-pane border border-foreground/10 rounded-3xl bg-foreground/5 space-y-4">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500">Diagnostic Tool</h3>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span>Client Initialized:</span>
+              <span className={supabase ? 'text-green-500' : 'text-red-500 font-bold'}>
+                {supabase ? 'YES' : 'NO'}
+              </span>
+            </div>
+            <div className="flex justify-between text-gray-400">
+              <span>Environment:</span>
+              <span>{process.env.NODE_ENV}</span>
+            </div>
+          </div>
+          
+          <button
+            type="button"
+            onClick={async () => {
+              const btn = document.getElementById('test-con-btn');
+              if (btn) btn.innerText = 'TESTING...';
+              try {
+                const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+                if (!url) throw new Error('No URL configured in environment');
+                const start = Date.now();
+                const res = await fetch(`${url}/auth/v1/health`);
+                const duration = Date.now() - start;
+                alert(`SUCCESS! Reached Supabase in ${duration}ms. Status: ${res.status}`);
+              } catch (err: any) {
+                alert(`FAILED to reach Supabase: ${err.message}`);
+              } finally {
+                if (btn) btn.innerText = 'TEST CONNECTION';
+              }
+            }}
+            id="test-con-btn"
+            className="w-full py-2 bg-foreground/10 hover:bg-foreground/20 border border-foreground/10 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all"
+          >
+            TEST CONNECTION
+          </button>
+          <p className="text-[10px] text-gray-500 italic text-center">
+            This button bypasses the library and tests raw network connectivity.
+          </p>
+        </div>
       </div>
     </main>
   );
