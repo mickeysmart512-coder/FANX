@@ -35,20 +35,29 @@ export default function SignupPage() {
           return;
         }
 
-        const { data, error } = await supabase
+        // Add a timeout to prevent hanging indefinitely
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('timeout')), 3000)
+        );
+
+        const checkPromise = supabase
           .from('profiles')
           .select('username')
           .eq('username', username.toLowerCase())
           .maybeSingle();
 
+        const result: any = await Promise.race([checkPromise, timeoutPromise]);
+        
+        const { data, error } = result;
+
         if (error) {
-          // If the error is about the table not existing (42P01), we allow signup
+          // Postgres error code 42P01 means 'profiles' table doesn't exist yet
           if (error.code === '42P01') {
-            console.warn('Profiles table not found. Defaulting to available.');
+            console.warn('Profiles table not yet created. Defaulting to available.');
             setUsernameStatus('available');
           } else {
-            console.error('Error checking username:', error);
-            setUsernameStatus('idle');
+            console.error('Database error checking username:', error);
+            setUsernameStatus('available'); // Don't block user on other DB errors
           }
           return;
         }
@@ -58,9 +67,14 @@ export default function SignupPage() {
         } else {
           setUsernameStatus('available');
         }
-      } catch (err) {
-        console.error('Unexpected error in username check:', err);
-        setUsernameStatus('available'); // Fallback to available to not block user
+      } catch (err: any) {
+        if (err.message === 'timeout') {
+          console.warn('Username check timed out. Assuming available to prevent blocking user.');
+          setUsernameStatus('available');
+        } else {
+          console.error('Unexpected error in username check:', err);
+          setUsernameStatus('available'); // Fallback to not block user
+        }
       }
     };
 
@@ -168,8 +182,9 @@ export default function SignupPage() {
                 {usernameStatus === 'taken' && <XCircle className="text-red-500" size={20} />}
               </div>
             </div>
-            {usernameStatus === 'taken' && <p className="text-[10px] text-red-500 ml-1 font-bold italic">Username already taken!</p>}
-            {usernameStatus === 'available' && <p className="text-[10px] text-green-500 ml-1 font-bold italic">Username available!</p>}
+            {usernameStatus === 'taken' && <p className="text-[10px] text-red-500 ml-1 font-bold italic transition-all">Username already taken!</p>}
+            {usernameStatus === 'available' && <p className="text-[10px] text-green-500 ml-1 font-bold italic transition-all">Username available!</p>}
+            {usernameStatus === 'checking' && <p className="text-[10px] text-gray-500 ml-1 font-medium italic animate-pulse">Checking availability...</p>}
             <p className="text-[10px] text-gray-500 ml-1 font-medium italic">3+ characters, only letters, numbers, and underscores.</p>
           </div>
 
