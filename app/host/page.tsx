@@ -167,7 +167,7 @@ function NavItem({ icon, label, active = false }: { icon: React.ReactNode, label
   );
 }
 
-function HostStatCard({ label, value, sub, icon }: { label: string, value: string, subText?: string, icon: React.ReactNode }) {
+function HostStatCard({ label, value, sub, icon }: { label: string, value: string, sub?: string, icon: React.ReactNode }) {
   return (
     <div className="glass-pane p-8 rounded-[40px] border border-foreground/10 relative overflow-hidden group hover:scale-[1.02] transition-all">
       <div className="absolute top-6 right-6 p-3 bg-foreground/5 rounded-2xl">{icon}</div>
