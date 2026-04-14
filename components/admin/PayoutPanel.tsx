@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatCurrency, coinsToUsd, coinsToNgn } from '@/lib/currency';
+import { supabase } from '@/lib/supabase';
 
 interface PayoutRequest {
   id: string;
@@ -12,18 +13,56 @@ interface PayoutRequest {
   reason: string;
 }
 
-const PENDING_PAYOUTS: PayoutRequest[] = [
-  { id: 'p1', celeb: 'StarBoy_419', coins: 30000, status: 'Flagged', risk: 'High', reason: 'Rapid gifting from single IP' },
-  { id: 'p2', celeb: 'Comedian_X', coins: 80000, status: 'Pending', risk: 'Low', reason: 'None' },
-  { id: 'p3', celeb: 'MamaNigeria', coins: 5000, status: 'Pending', risk: 'Low', reason: 'None' },
-];
-
 export default function PayoutPanel() {
-  const [payouts, setPayouts] = useState(PENDING_PAYOUTS);
+  const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const lockPayout = (id: string) => {
+  useEffect(() => {
+    async function fetchPayouts() {
+      const { data, error } = await supabase
+        .from('payout_requests')
+        .select(`*, profiles(username)`)
+        .order('created_at', { ascending: false });
+
+      if (data) {
+        const mapped: PayoutRequest[] = data.map((row: any) => ({
+          id: row.id,
+          celeb: row.profiles?.username || 'Unknown',
+          coins: row.coins,
+          status: row.status,
+          risk: row.risk_level,
+          reason: row.reason || 'None',
+        }));
+        setPayouts(mapped);
+      }
+      setLoading(false);
+    }
+    fetchPayouts();
+
+    // Set up realtime sub
+    const sub = supabase.channel('payout_updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payout_requests' }, () => {
+        fetchPayouts();
+      }).subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+  }, []);
+
+  const lockPayout = async (id: string, currentStatus: string) => {
+    if (currentStatus === 'Processing' || currentStatus === 'Completed') return;
+    
+    // Quick UI optimism
     setPayouts(prev => prev.map(p => p.id === id ? { ...p, status: 'Processing' } : p));
-    console.log(`Locking payout ${id} to prevent double-dipping.`);
+    
+    // Persist to DB
+    const { error } = await supabase
+      .from('payout_requests')
+      .update({ status: 'Processing' })
+      .eq('id', id);
+
+    if (error) {
+      alert('Error updating payout: ' + error.message);
+    }
   };
 
   return (
@@ -50,9 +89,13 @@ export default function PayoutPanel() {
             </tr>
           </thead>
           <tbody className="divide-y divide-foreground/5">
-            {payouts.map((payout) => (
+            {loading ? (
+              <tr><td colSpan={6} className="py-8 text-center text-gray-500 animate-pulse">Loading real-time payouts...</td></tr>
+            ) : payouts.length === 0 ? (
+              <tr><td colSpan={6} className="py-8 text-center text-gray-500 font-bold italic">No pending payout requests.</td></tr>
+            ) : payouts.map((payout) => (
               <tr key={payout.id} className="group hover:bg-foreground/5 transition-all">
-                <td className="py-4 font-bold">{payout.celeb}</td>
+                <td className="py-4 font-bold">@{payout.celeb}</td>
                 <td className="py-4 font-mono text-fanx-secondary">{payout.coins.toLocaleString()} 🪙</td>
                 <td className="py-4 text-xs">{formatCurrency(coinsToUsd(payout.coins), 'USD')}</td>
                 <td className="py-4 text-xs font-bold text-fanx-primary">
@@ -75,11 +118,11 @@ export default function PayoutPanel() {
                 </td>
                 <td className="py-4 text-right space-x-2">
                   <button 
-                    disabled={payout.status === 'Processing'}
-                    onClick={() => lockPayout(payout.id)}
-                    className="px-4 py-1.5 bg-foreground text-background text-[10px] font-bold rounded-full disabled:opacity-50"
+                    disabled={payout.status === 'Processing' || payout.status === 'Completed'}
+                    onClick={() => lockPayout(payout.id, payout.status)}
+                    className="px-4 py-1.5 bg-foreground text-background text-[10px] font-bold rounded-full disabled:opacity-50 hover:scale-105 transition-all outline-none"
                   >
-                    {payout.status === 'Processing' ? 'LOCKED' : 'APPROVE'}
+                    {payout.status === 'Processing' ? 'LOCKED' : payout.status === 'Completed' ? 'PAID' : 'APPROVE'}
                   </button>
                 </td>
               </tr>
