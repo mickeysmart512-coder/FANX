@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import LiveRoomContainer from '@/components/video/LiveRoomContainer';
 import GiftBar from '@/components/gifts/GiftBar';
 import GiftAnimationLayer from '@/components/gifts/GiftAnimationLayer';
+import ShareButton from '@/components/video/ShareButton';
 
 export default async function LiveRoom({ 
   params 
@@ -46,7 +47,7 @@ export default async function LiveRoom({
         </div>
         
         <div className="flex gap-2">
-          <button className="px-4 py-1.5 glass-pane text-[10px] font-bold">SHARE</button>
+          <ShareButton />
           <a href="/host" className="px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-full">EXIT ROOM</a>
         </div>
       </header>
@@ -57,10 +58,10 @@ export default async function LiveRoom({
       </main>
 
       {/* Global Real-time Layers */}
-      <GiftAnimationLayer />
+      <GiftAnimationLayer roomId={roomId} />
       
       {/* Interaction Bar */}
-      <GiftBar />
+      <GiftBar roomId={roomId} />
     </div>
   );
 }
