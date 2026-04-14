@@ -12,34 +12,13 @@ export default function Home() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }: any) => {
-      const currentSession = data?.session || null;
-      setSession(currentSession);
-      
-      // Auto-redirect if session exists
-      if (currentSession) {
-        const role = currentSession.user.user_metadata?.role;
-        const email = currentSession.user.email;
-        if (role === 'admin' || email === 'onojamichaelmichael@gmail.com') {
-          window.location.href = '/admin';
-        } else if (window.location.pathname === '/') {
-          window.location.href = '/explore';
-        }
-      }
+      setSession(data?.session || null);
     });
-
+ 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setSession(session);
-      if (session) {
-        const role = session.user.user_metadata?.role;
-        const email = session.user.email;
-        if (role === 'admin' || email === 'onojamichaelmichael@gmail.com') {
-          window.location.href = '/admin';
-        } else if (window.location.pathname === '/') {
-          window.location.href = '/explore';
-        }
-      }
     });
-
+ 
     return () => subscription.unsubscribe();
   }, [router]);
 
