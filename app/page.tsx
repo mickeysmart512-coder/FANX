@@ -22,6 +22,11 @@ export default function Home() {
 
   const dashboardPath = session?.user?.user_metadata?.role === 'admin' ? '/admin' : '/explore';
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-foreground relative overflow-hidden transition-colors duration-300">
       {/* Background Glows */}
@@ -44,9 +49,17 @@ export default function Home() {
               </Link>
             </>
           ) : (
-            <Link href={dashboardPath} className="px-6 py-2 rounded-full bg-foreground text-background font-bold hover:scale-105 transition-all">
-              Dashboard
-            </Link>
+            <div className="flex items-center space-x-3">
+              <Link href={dashboardPath} className="px-6 py-2 rounded-full bg-foreground text-background font-bold hover:scale-105 transition-all">
+                Dashboard
+              </Link>
+              <button 
+                onClick={handleSignOut}
+                className="px-6 py-2 rounded-full glass-pane hover:bg-red-500/10 hover:text-red-500 transition-all text-sm font-medium"
+              >
+                Sign Out
+              </button>
+            </div>
           )}
         </div>
       </header>
