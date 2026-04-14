@@ -20,9 +20,9 @@ export default function Home() {
         const role = currentSession.user.user_metadata?.role;
         const email = currentSession.user.email;
         if (role === 'admin' || email === 'onojamichaelmichael@gmail.com') {
-          router.push('/admin');
-        } else {
-          router.push('/explore');
+          window.location.href = '/admin';
+        } else if (window.location.pathname === '/') {
+          window.location.href = '/explore';
         }
       }
     });
@@ -33,9 +33,9 @@ export default function Home() {
         const role = session.user.user_metadata?.role;
         const email = session.user.email;
         if (role === 'admin' || email === 'onojamichaelmichael@gmail.com') {
-          router.push('/admin');
-        } else {
-          router.push('/explore');
+          window.location.href = '/admin';
+        } else if (window.location.pathname === '/') {
+          window.location.href = '/explore';
         }
       }
     });
@@ -48,6 +48,10 @@ export default function Home() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.reload();
+  };
+
+  const goToDashboard = () => {
+    window.location.href = dashboardPath;
   };
 
   return (
@@ -78,9 +82,12 @@ export default function Home() {
             </>
           ) : (
             <div className="flex items-center space-x-3">
-              <Link href={dashboardPath} className="px-6 py-2 rounded-full bg-foreground text-background font-bold hover:scale-105 transition-all">
+              <button 
+                onClick={goToDashboard}
+                className="px-6 py-2 rounded-full bg-foreground text-background font-bold hover:scale-105 transition-all"
+              >
                 Dashboard
-              </Link>
+              </button>
               <button 
                 onClick={handleSignOut}
                 className="px-6 py-2 rounded-full glass-pane hover:bg-red-500/10 hover:text-red-500 transition-all text-sm font-medium"
