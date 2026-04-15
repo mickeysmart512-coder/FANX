@@ -216,8 +216,8 @@ export default function GiftBar({ roomId, isGuest = false }: GiftBarProps) {
                     className={`w-11 h-11 rounded-xl glass-pane flex items-center justify-center text-xl group-hover:scale-110 transition-all ${isSent ? 'bg-white/20 ring-2' : ''}`}
                     style={{ 
                       textShadow: `0 0 10px ${gift.color || '#fff'}`,
-                      ringColor: isSent ? gift.color || '#fff' : 'transparent',
-                      boxShadow: isSent ? `0 0 20px ${gift.color || '#ffffff'}80` : 'none'
+                      boxShadow: isSent ? `0 0 20px ${gift.color || '#ffffff'}80` : 'none',
+                      borderColor: isSent ? (gift.color || '#fff') : 'transparent'
                     }}
                   >
                     {gift.icon}
