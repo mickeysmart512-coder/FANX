@@ -70,7 +70,8 @@ export default async function LiveRoom({
     role = 'guest';
   }
 
-  const identity = user?.user_metadata?.username || user?.email || 'guest-' + Math.floor(Math.random() * 9999);
+  const name = user?.user_metadata?.username || user?.email || 'guest-' + Math.floor(Math.random() * 9999);
+  const identity = user?.id || name;
   const canPublish = role === 'host' || role === 'cohost';
   const isGuest = role === 'guest';
   const isHost = role === 'host';
@@ -79,8 +80,8 @@ export default async function LiveRoom({
   return (
     <div className="h-screen flex flex-col bg-black overflow-hidden relative">
       {/* Top Navigation */}
-      <header className="fixed top-0 w-full p-4 flex justify-between items-center z-40 bg-gradient-to-b from-black/80 to-transparent">
-        <div className="flex items-center gap-4">
+      <header className="fixed top-0 w-full p-4 flex justify-between items-center z-40 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+        <div className="flex items-center gap-4 pointer-events-auto">
           <div className="text-2xl font-black italic">FAN<span className="text-fanx-primary">X</span></div>
           <div className="h-6 w-[1px] bg-white/20" />
           <div className="flex flex-col">
@@ -94,7 +95,7 @@ export default async function LiveRoom({
           </div>
         </div>
 
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center pointer-events-auto">
           {isCohost && (
             <span className="px-3 py-1 bg-fanx-secondary/20 border border-fanx-secondary/50 text-fanx-secondary text-[9px] font-black rounded-full tracking-widest">CO-HOST</span>
           )}
@@ -111,10 +112,11 @@ export default async function LiveRoom({
       </header>
 
       {/* Main Video — grid layout with role badges */}
-      <main className="flex-1 pt-14">
+      <main className="flex-1">
         <LiveRoomContainer
           roomId={roomId}
           identity={identity}
+          name={name}
           canPublish={canPublish}
           isHost={isHost}
           isCohost={isCohost}

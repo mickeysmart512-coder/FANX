@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const roomId = searchParams.get('roomId');
   const identity = searchParams.get('identity') || 'guest-' + Math.floor(Math.random() * 10000);
+  const name = searchParams.get('name') || identity;
   const canPublish = searchParams.get('canPublish') !== 'false'; // default true, fans pass false
 
   if (!roomId) {
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
 
   const at = new AccessToken(apiKey, apiSecret, {
     identity: identity,
+    name: name,
   });
 
   at.addGrant({ 
