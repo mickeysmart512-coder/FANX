@@ -33,21 +33,34 @@ export default function CoHostNotification({ sessionId }: { sessionId: string })
 
   useEffect(() => {
     const loadRequests = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('cohost_requests')
-        .select('id, requester_id, created_at, profiles(username, display_name, avatar_url)')
+        .select('id, requester_id, created_at')
         .eq('session_id', sessionId)
         .eq('status', 'pending')
         .order('created_at', { ascending: true });
 
+      if (error) console.error('Co-host fetch error:', error);
+
       if (data && data.length > 0) {
-        const mapped = data.map((r: any) => ({
-          id: r.id,
-          requester_id: r.requester_id,
-          requester_name: r.profiles?.display_name || r.profiles?.username || 'Fan',
-          requester_avatar: r.profiles?.avatar_url,
-          created_at: r.created_at,
-        }));
+        const userIds = data.map(d => d.requester_id);
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, username, display_name, avatar_url')
+          .in('id', userIds);
+          
+        const pMap = new Map(profiles?.map(p => [p.id, p]));
+
+        const mapped = data.map((r: any) => {
+          const p = pMap.get(r.requester_id);
+          return {
+            id: r.id,
+            requester_id: r.requester_id,
+            requester_name: p?.display_name || p?.username || 'Fan',
+            requester_avatar: p?.avatar_url,
+            created_at: r.created_at,
+          };
+        });
         setRequests(mapped);
         openPanel();
       }
