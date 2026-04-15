@@ -103,11 +103,17 @@ export default function GiftBar({ roomId, isGuest = false }: GiftBarProps) {
     if (cohostStatus === 'pending') return;
 
     setCohostStatus('pending');
-    await supabase.from('cohost_requests').insert({
+    const { error } = await supabase.from('cohost_requests').insert({
       session_id: roomId,
       requester_id: userId,
       status: 'pending'
     });
+
+    if (error) {
+      console.error(error);
+      alert(`Could not request: ${error.message}`);
+      setCohostStatus('idle');
+    }
   };
 
   const addMockCoins = async () => {
